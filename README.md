@@ -12,3 +12,14 @@ if you pay attention, people often make X or Y a quite practical or at least lay
 Bearing that in mind, on one such occasion with the group I was practicing with, we kept missing the cue for
 the song to advance, and were trapped in an eternal loop of verse->pre chorus-> chorus. I said out loud, "If only we had some sort of screen that we could advance with a pedal, and it would display just the name of a part, like Verse or Bridge,
 so we knew were to go next". Well in 2025, with the Internet, Amazon, Raspberry Pi 4/5 and AI... as I looked around the room at my jam-mates nodding, I realized if I had a good idea, I could literally do it myself. 
+
+## Initial POC
+With about an hour of prompts to o3, I had a nice iterative experience that was truly Agile on fast-forward. I refined the POC as it developed, and while currently the HTML/CSS/JS being put out is quite poorly formed and hardly updateable, 
+that isn't the point of this POC. The POC here is to see if this truly feels useful on it's own, or if it needs something different or more to reach the solution to my jam groups issues keeping our place in songs. What's nice about 
+using AI for this is I don't have to really do much work, to get a POC to the level it would be at for something I can consider useful normally would take a while, from writing down requirements, to separating concerns, to scaffolding some code, etc.
+All to really just 'get a good look' at your idea, to see if it's worth actually truly executing upon. With AI, the entire process from spitballing an idea out loud with someone (in this case, o30 to having a fully working prototype that can be tested
+witha  mouse, keyboard, touchscreen or USB pedal was 1 hour. 
+
+Again, I would never really use this as production code, or really even as development code. The state it's in really doesn't lend itself to clarity or structure, and as such is not going to be easily editable or updateable. 
+Structure is critical to the iterative process, and adding features in the future is definitely something we should forsee with a DIY project meant to help or increase convenience. Humans tend to see improvement and quickly wish to improve upon it. 
+Still, as a programmer, AI helped me do a lot of things that weren't programming that I as a programmer would have had to do on my own. There's no denying the benefit of a sybmiotic workflow with AI. 
