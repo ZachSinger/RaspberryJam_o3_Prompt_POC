@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Band Cue Display</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --fg-main: #fff;
+        --fg-dim: #666;
+        --accent: #0f0;
+        --bg: #000;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--fg-main);
+        font-family: Helvetica, Arial, sans-serif;
+        overflow: hidden;
+      }
+
+      /* ==== SONG TITLE + NAV ARROWS ==== */
+      #songHeader {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 2vw;
+        font-size: 3vw;
+        font-weight: 600;
+        user-select: none;
+        z-index: 5;
+      }
+      #songName {
+        color: var(--accent);
+        white-space: nowrap;
+      }
+      .song-nav {
+        cursor: pointer;
+        color: var(--accent);
+        transition: opacity 0.2s;
+        user-select: none;
+      }
+      .song-nav.disabled {
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      /* ==== CUE AREA ==== */
+      #cueContainer {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .cue-current {
+        font-size: 12vw;
+        font-weight: 700;
+        line-height: 1.1;
+        white-space: nowrap;
+        user-select: none;
+      }
+      .cue-next {
+        font-size: 5vw;
+        font-weight: 700;
+        color: var(--fg-dim);
+        white-space: nowrap;
+        user-select: none;
+      }
+      .arrow {
+        font-size: 8vw;
+        padding: 0 2vw;
+        color: var(--fg-dim);
+        user-select: none;
+      }
+
+      @media (orientation: landscape) {
+        #cueContainer {
+          flex-direction: row;
+        }
+        .cue-current {
+          text-align: right;
+        }
+      }
+      @media (orientation: portrait) {
+        #cueContainer {
+          flex-direction: column;
+        }
+        .cue-current.has-next {
+          position: absolute;
+          top: 30vh;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+        }
+        .cue-next {
+          position: absolute;
+          top: 52vh;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+        }
+        .arrow {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Song title and navigation -->
+    <div id="songHeader">
+      <span id="prevSongArrow" class="song-nav">&#9664;</span>
+      <span id="songName"></span>
+      <span id="nextSongArrow" class="song-nav">&#9654;</span>
+    </div>
+
+    <!-- Part cues -->
+    <div id="cueContainer">
+      <div id="currentCue" class="cue-current"></div>
+      <div id="arrow" class="arrow">&#10132;</div>
+      <div id="nextCue" class="cue-next"></div>
+    </div>
+
+    <script>
+      /* === CONFIG === */
+      const songs = {
+        "Song A": [
+          "Intro",
+          "Verse 1",
+          "Chorus",
+          "Verse 2",
+          "Chorus",
+          "Bridge",
+          "Chorus",
+          "Outro",
+        ],
+        "Song B": [
+          "Count-In",
+          "Verse",
+          "Pre-Chorus",
+          "Chorus",
+          "Solo",
+          "Chorus",
+          "Outro",
+        ],
+      };
+
+      /* === STATE === */
+      const songNames = Object.keys(songs);
+      let currentSongIdx = 0,
+        currentPartIdx = 0;
+
+      /* === DOM === */
+      const prevSongArrowEl = document.getElementById("prevSongArrow");
+      const nextSongArrowEl = document.getElementById("nextSongArrow");
+      const songNameEl = document.getElementById("songName");
+      const currentCueEl = document.getElementById("currentCue");
+      const nextCueEl = document.getElementById("nextCue");
+      const arrowEl = document.getElementById("arrow");
+      const PORTRAIT = window.matchMedia("(orientation: portrait)");
+      const LANDSCAPE = window.matchMedia("(orientation: landscape)");
+
+      /* === RENDER === */
+      function updateSongArrows() {
+        prevSongArrowEl.classList.toggle("disabled", currentSongIdx === 0);
+        nextSongArrowEl.classList.toggle(
+          "disabled",
+          currentSongIdx === songNames.length - 1
+        );
+      }
+
+      function updateDisplay() {
+        const songName = songNames[currentSongIdx],
+          parts = songs[songName];
+        songNameEl.textContent = songName;
+        updateSongArrows();
+
+        currentCueEl.textContent = parts[currentPartIdx];
+        if (currentPartIdx < parts.length - 1) {
+          nextCueEl.textContent = parts[currentPartIdx + 1];
+          nextCueEl.style.display = "";
+          arrowEl.style.display = LANDSCAPE.matches ? "" : "";
+          currentCueEl.classList.add("has-next");
+          if (LANDSCAPE.matches) {
+            currentCueEl.style.textAlign = "right";
+            currentCueEl.style.position = "static";
+            currentCueEl.style.transform = "none";
+          } else {
+            currentCueEl.style.position = "absolute";
+            currentCueEl.style.top = "30vh";
+            currentCueEl.style.left = "50%";
+            currentCueEl.style.transform = "translateX(-50%)";
+          }
+        } else {
+          nextCueEl.style.display = "none";
+          arrowEl.style.display = "none";
+          currentCueEl.classList.remove("has-next");
+          if (LANDSCAPE.matches) {
+            currentCueEl.style.textAlign = "center";
+            currentCueEl.style.position = "static";
+            currentCueEl.style.transform = "none";
+          }
+          if (PORTRAIT.matches) {
+            currentCueEl.style.position = "absolute";
+            currentCueEl.style.top = "50%";
+            currentCueEl.style.left = "50%";
+            currentCueEl.style.transform = "translate(-50%, -50%)";
+          }
+        }
+      }
+      PORTRAIT.addEventListener("change", updateDisplay);
+      LANDSCAPE.addEventListener("change", updateDisplay);
+
+      /* === NAV HELPERS === */
+      function nextPart() {
+        const parts = songs[songNames[currentSongIdx]];
+        if (currentPartIdx < parts.length - 1) {
+          currentPartIdx++;
+          updateDisplay();
+        }
+      }
+      function prevPart() {
+        if (currentPartIdx > 0) {
+          currentPartIdx--;
+          updateDisplay();
+        }
+      }
+      function nextSong() {
+        if (currentSongIdx < songNames.length - 1) {
+          currentSongIdx++;
+          currentPartIdx = 0;
+          updateDisplay();
+        }
+      }
+      function prevSong() {
+        if (currentSongIdx > 0) {
+          currentSongIdx--;
+          currentPartIdx = 0;
+          updateDisplay();
+        }
+      }
+
+      /* === ARROW CLICK LISTENERS === */
+      prevSongArrowEl.addEventListener("click", prevSong);
+      nextSongArrowEl.addEventListener("click", nextSong);
+
+      /* === TOUCH / CLICK (PART NAV) === */
+      document.addEventListener("click", nextPart);
+      document.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        prevPart();
+      });
+      let touchTimer,
+        longFired = false;
+      document.addEventListener("touchstart", () => {
+        longFired = false;
+        touchTimer = setTimeout(() => {
+          prevPart();
+          longFired = true;
+        }, 600);
+      });
+      document.addEventListener("touchend", () => {
+        clearTimeout(touchTimer);
+        if (!longFired) nextPart();
+      });
+
+      /* === SINGLE "P" KEY W/ DOUBLE TAP & HOLD === */
+      let keyStart = null,
+        holdTimeout = null,
+        holdInterval = null;
+      let tapCount = 0,
+        doubleTapTimer = null;
+      function clearHoldTimers() {
+        clearTimeout(holdTimeout);
+        clearInterval(holdInterval);
+        holdTimeout = holdInterval = null;
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key.toLowerCase() !== "p" || keyStart !== null) return;
+        keyStart = Date.now();
+        const isSecondTap = tapCount === 1;
+        if (isSecondTap && doubleTapTimer) {
+          clearTimeout(doubleTapTimer);
+          doubleTapTimer = null;
+        }
+        const repeatFn = isSecondTap ? prevSong : prevPart;
+        holdTimeout = setTimeout(() => {
+          repeatFn();
+          holdInterval = setInterval(repeatFn, 500);
+        }, 500);
+      });
+      document.addEventListener("keyup", (e) => {
+        if (e.key.toLowerCase() !== "p" || keyStart === null) return;
+        const duration = Date.now() - keyStart;
+        keyStart = null;
+        clearHoldTimers();
+        if (tapCount === 1) {
+          if (duration < 150) {
+            nextSong();
+          }
+          tapCount = 0;
+          return;
+        }
+        if (duration < 500) {
+          tapCount = 1;
+          doubleTapTimer = setTimeout(() => {
+            if (tapCount === 1) {
+              nextPart();
+            }
+            tapCount = 0;
+            doubleTapTimer = null;
+          }, 150);
+        } else {
+          tapCount = 0;
+        }
+      });
+
+      /* === EXPORT === */
+      Object.assign(window, { nextPart, prevPart, nextSong, prevSong });
+      updateDisplay();
+    </script>
+  </body>
+</html>
