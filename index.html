@@ -10,7 +10,6 @@
         --fg-dim: #666;
         --accent: #0f0;
         --bg: #000;
-        --flash: #111;
       }
       * {
         box-sizing: border-box;
@@ -62,7 +61,6 @@
         opacity: 0.25;
         pointer-events: none;
       }
-      /* hamburger */
       #hamburger {
         position: absolute;
         right: 16px;
@@ -109,12 +107,12 @@
         height: 100%;
         display: none;
         padding-top: 60px;
-      } /* leave room for header */
+      }
       .view.active {
         display: block;
       }
 
-      /* ===== CUE AREA (Jam Screen) ===== */
+      /* ===== CUE AREA ===== */
       #cueContainer {
         position: relative;
         width: 100%;
@@ -177,46 +175,56 @@
 
       /* ===== BPM WIDGET ===== */
       #bpmWidget {
-        width: 100%;
+        position: fixed;
+        top: 4px;
+        left: 8px;
         display: flex;
-        justify-content: center;
         align-items: center;
-        gap: 12px;
-        position: absolute;
-        bottom: 40px;
-        left: 0;
+        gap: 0.8vw;
+        z-index: 11;
       }
-      #bpmWidget label {
-        font-size: 4vw;
+      #bpmWidget label,
+      #bpmInput,
+      #bpmToggle {
+        font-size: 3vw;
       }
       #bpmInput {
-        width: 180px;
+        width: 10vw;
+        min-width: 60px;
         text-align: center;
-        font-size: 4vw;
         background: #222;
         border: 1px solid var(--fg-dim);
         color: var(--fg-main);
         border-radius: 4px;
+        -moz-appearance: textfield;
+      }
+      #bpmInput::-webkit-inner-spin-button,
+      #bpmInput::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
       .bpm-arrow {
-        font-size: 6vw;
+        font-size: 4vw;
         cursor: pointer;
         user-select: none;
       }
-      #bpmToggle {
-        font-size: 4vw;
-        padding: 4px 8px;
-        background: var(--accent);
-        border: none;
-        color: #000;
-        font-weight: 700;
-        cursor: pointer;
-      }
 
-      /* flash effect */
-      .flash {
-        background: var(--flash) !important;
-        transition: background 0.1s;
+      /* ===== BEAT CIRCLE ===== */
+      #beatCircle {
+        position: absolute;
+        left: 50%;
+        top: 70%;
+        transform: translate(-50%, -50%);
+        width: 10vw;
+        height: 10vw;
+        min-width: 50px;
+        min-height: 50px;
+        border-radius: 50%;
+        background: var(--accent);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.1s;
+        display: none;
       }
     </style>
   </head>
@@ -244,6 +252,8 @@
         <div id="partArrow" class="arrow-part">&#10132;</div>
         <div id="nextCue" class="cue-next"></div>
       </div>
+      <!-- Beat circle -->
+      <div id="beatCircle"></div>
       <!-- BPM Widget -->
       <div id="bpmWidget">
         <span class="bpm-arrow" id="bpmDec">&#9664;</span>
@@ -254,7 +264,7 @@
       </div>
     </section>
 
-    <!-- SONG EDITOR SCREEN (placeholder) -->
+    <!-- SONG EDITOR -->
     <section id="editScreen" class="view">
       <div
         style="
@@ -271,7 +281,7 @@
     </section>
 
     <script>
-      /* ===== CONFIG / DATA ===== */
+      /* ===== DATA ===== */
       const songs = {
         "Song A": [
           "Intro",
@@ -293,12 +303,10 @@
           "Outro",
         ],
       };
-
-      /* ===== STATE ===== */
       const songNames = Object.keys(songs);
       let currentSongIdx = 0,
-        currentPartIdx = 0;
-      let activeView = "jam";
+        currentPartIdx = 0,
+        activeView = "jam";
 
       /* ===== DOM ===== */
       const songNameEl = document.getElementById("songName");
@@ -307,10 +315,11 @@
       const currentCueEl = document.getElementById("currentCue");
       const nextCueEl = document.getElementById("nextCue");
       const partArrowEl = document.getElementById("partArrow");
+      const beatCircle = document.getElementById("beatCircle");
       const PORTRAIT = window.matchMedia("(orientation: portrait)");
       const LANDSCAPE = window.matchMedia("(orientation: landscape)");
 
-      /* ----- BPM elements ----- */
+      /* BPM elements */
       const bpmInput = document.getElementById("bpmInput");
       const bpmDec = document.getElementById("bpmDec");
       const bpmInc = document.getElementById("bpmInc");
@@ -330,8 +339,7 @@
         .addEventListener("click", () => sideMenu.classList.toggle("hidden"));
       sideMenu.addEventListener("click", (e) => {
         const v = e.target.dataset.view;
-        if (!v) return;
-        showView(v);
+        if (v) showView(v);
       });
       function showView(view) {
         activeView = view;
@@ -340,7 +348,7 @@
         sideMenu.classList.add("hidden");
       }
 
-      /* ===== SONG NAV HELPERS ===== */
+      /* ===== SONG NAV ===== */
       function updateSongArrows() {
         prevSongArrowEl.classList.toggle("disabled", currentSongIdx === 0);
         nextSongArrowEl.classList.toggle(
@@ -365,7 +373,7 @@
       prevSongArrowEl.addEventListener("click", prevSong);
       nextSongArrowEl.addEventListener("click", nextSong);
 
-      /* ===== PART NAV HELPERS ===== */
+      /* ===== PART NAV ===== */
       function nextPart() {
         if (activeView !== "jam") return;
         const parts = songs[songNames[currentSongIdx]];
@@ -417,7 +425,7 @@
             currentCueEl.style.position = "absolute";
             currentCueEl.style.top = "50%";
             currentCueEl.style.left = "50%";
-            currentCueEl.style.transform = "translate(-50%, -50%)";
+            currentCueEl.style.transform = "translate(-50%,-50%)";
           }
         }
       }
@@ -431,20 +439,26 @@
       function renderBpm() {
         bpmInput.value = bpm;
       }
+      function flashCircle() {
+        beatCircle.style.opacity = 1;
+        setTimeout(() => (beatCircle.style.opacity = 0), 100);
+      }
       function startBeat() {
         clearInterval(beatTimer);
-        const period = 60000 / bpm;
         if (bpmEnabled) {
-          beatTimer = setInterval(() => {
-            document.body.classList.add("flash");
-            setTimeout(() => document.body.classList.remove("flash"), 100);
-          }, period);
+          beatCircle.style.display = "block";
+          const period = 60000 / bpm;
+          flashCircle();
+          beatTimer = setInterval(flashCircle, period);
+        } else {
+          beatCircle.style.display = "none";
+          beatCircle.style.opacity = 0;
         }
       }
       function setBpm(val) {
         bpm = clampBpm(val);
         renderBpm();
-        startBeat();
+        if (bpmEnabled) startBeat();
       }
       bpmDec.addEventListener("click", () => setBpm(bpm - 1));
       bpmInc.addEventListener("click", () => setBpm(bpm + 1));
@@ -458,7 +472,7 @@
       });
       renderBpm();
 
-      /* ===== TOUCH / CLICK PART NAV ===== */
+      /* ===== INPUT NAV ===== */
       document.addEventListener("click", (e) => {
         if (
           e.target.closest("#songHeader") ||
@@ -474,7 +488,6 @@
         e.preventDefault();
         prevPart();
       });
-
       let touchTimer,
         longFired = false;
       document.addEventListener("touchstart", (e) => {
@@ -491,19 +504,19 @@
           longFired = true;
         }, 600);
       });
-      document.addEventListener("touchend", (e) => {
+      document.addEventListener("touchend", () => {
         if (activeView !== "jam") return;
         clearTimeout(touchTimer);
         if (!longFired) nextPart();
       });
 
-      /* ===== SINGLE "P" KEY WITH GESTURES (Jam view only) ===== */
+      /* ===== KEY GESTURES ===== */
       let keyStart = null,
         holdTimeout = null,
-        holdInterval = null;
-      let tapCount = 0,
+        holdInterval = null,
+        tapCount = 0,
         doubleTapTimer = null;
-      function clearHoldTimers() {
+      function clearHold() {
         clearTimeout(holdTimeout);
         clearInterval(holdInterval);
         holdTimeout = holdInterval = null;
@@ -512,12 +525,12 @@
         if (activeView !== "jam") return;
         if (keyStart !== null) return;
         keyStart = Date.now();
-        const isSecond = tapCount === 1;
-        if (isSecond && doubleTapTimer) {
+        const second = tapCount === 1;
+        if (second && doubleTapTimer) {
           clearTimeout(doubleTapTimer);
           doubleTapTimer = null;
         }
-        const repeatFn = isSecond ? prevSong : prevPart;
+        const repeatFn = second ? prevSong : prevPart;
         holdTimeout = setTimeout(() => {
           repeatFn();
           holdInterval = setInterval(repeatFn, 500);
@@ -528,26 +541,20 @@
         if (keyStart === null) return;
         const dur = Date.now() - keyStart;
         keyStart = null;
-        clearHoldTimers();
+        clearHold();
         if (tapCount === 1) {
-          if (dur < 150) {
-            nextSong();
-          }
+          if (dur < 150) nextSong();
           tapCount = 0;
           return;
         }
         if (dur < 500) {
           tapCount = 1;
           doubleTapTimer = setTimeout(() => {
-            if (tapCount === 1) {
-              nextPart();
-            }
+            if (tapCount === 1) nextPart();
             tapCount = 0;
             doubleTapTimer = null;
           }, 150);
-        } else {
-          tapCount = 0;
-        }
+        } else tapCount = 0;
       });
 
       /* ===== INIT ===== */
