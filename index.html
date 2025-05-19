@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Band Cue Display</title>
+    <title>Band Cue App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       :root {
@@ -10,6 +10,7 @@
         --fg-dim: #666;
         --accent: #0f0;
         --bg: #000;
+        --flash: #111;
       }
       * {
         box-sizing: border-box;
@@ -26,19 +27,26 @@
         overflow: hidden;
       }
 
-      /* ==== SONG TITLE + NAV ARROWS ==== */
-      #songHeader {
+      /* ===== GLOBAL HEADER ===== */
+      #appHeader {
         position: fixed;
-        top: 16px;
-        left: 50%;
-        transform: translateX(-50%);
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        pointer-events: none;
+      }
+      #songHeader {
         display: flex;
         align-items: center;
         gap: 2vw;
         font-size: 3vw;
         font-weight: 600;
         user-select: none;
-        z-index: 5;
+        pointer-events: auto;
       }
       #songName {
         color: var(--accent);
@@ -54,12 +62,63 @@
         opacity: 0.25;
         pointer-events: none;
       }
+      /* hamburger */
+      #hamburger {
+        position: absolute;
+        right: 16px;
+        top: 8px;
+        font-size: 4vw;
+        background: none;
+        border: none;
+        color: var(--fg-main);
+        cursor: pointer;
+        pointer-events: auto;
+        user-select: none;
+      }
 
-      /* ==== CUE AREA ==== */
+      /* ===== SIDE MENU ===== */
+      #sideMenu {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 45vw;
+        max-width: 200px;
+        background: rgba(0, 0, 0, 0.9);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 15;
+      }
+      #sideMenu.hidden {
+        display: none;
+      }
+      #sideMenu button {
+        font-size: 5vw;
+        background: var(--accent);
+        border: none;
+        padding: 8px;
+        color: #000;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      /* ===== VIEWS ===== */
+      .view {
+        width: 100%;
+        height: 100%;
+        display: none;
+        padding-top: 60px;
+      } /* leave room for header */
+      .view.active {
+        display: block;
+      }
+
+      /* ===== CUE AREA (Jam Screen) ===== */
       #cueContainer {
         position: relative;
         width: 100%;
-        height: 100%;
+        height: calc(100% - 200px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -78,7 +137,7 @@
         white-space: nowrap;
         user-select: none;
       }
-      .arrow {
+      .arrow-part {
         font-size: 8vw;
         padding: 0 2vw;
         color: var(--fg-dim);
@@ -111,29 +170,108 @@
           transform: translateX(-50%);
           text-align: center;
         }
-        .arrow {
+        .arrow-part {
           display: none;
         }
+      }
+
+      /* ===== BPM WIDGET ===== */
+      #bpmWidget {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        position: absolute;
+        bottom: 40px;
+        left: 0;
+      }
+      #bpmWidget label {
+        font-size: 4vw;
+      }
+      #bpmInput {
+        width: 180px;
+        text-align: center;
+        font-size: 4vw;
+        background: #222;
+        border: 1px solid var(--fg-dim);
+        color: var(--fg-main);
+        border-radius: 4px;
+      }
+      .bpm-arrow {
+        font-size: 6vw;
+        cursor: pointer;
+        user-select: none;
+      }
+      #bpmToggle {
+        font-size: 4vw;
+        padding: 4px 8px;
+        background: var(--accent);
+        border: none;
+        color: #000;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      /* flash effect */
+      .flash {
+        background: var(--flash) !important;
+        transition: background 0.1s;
       }
     </style>
   </head>
   <body>
-    <!-- Song title and navigation -->
-    <div id="songHeader">
-      <span id="prevSongArrow" class="song-nav">&#9664;</span>
-      <span id="songName"></span>
-      <span id="nextSongArrow" class="song-nav">&#9654;</span>
-    </div>
+    <!-- HEADER -->
+    <header id="appHeader">
+      <div id="songHeader">
+        <span id="prevSongArrow" class="song-nav">&#9664;</span>
+        <span id="songName"></span>
+        <span id="nextSongArrow" class="song-nav">&#9654;</span>
+      </div>
+      <button id="hamburger">&#9776;</button>
+    </header>
 
-    <!-- Part cues -->
-    <div id="cueContainer">
-      <div id="currentCue" class="cue-current"></div>
-      <div id="arrow" class="arrow">&#10132;</div>
-      <div id="nextCue" class="cue-next"></div>
-    </div>
+    <!-- SIDE MENU -->
+    <nav id="sideMenu" class="hidden">
+      <button data-view="jam">Jam Screen</button>
+      <button data-view="edit">Song Editor</button>
+    </nav>
+
+    <!-- JAM SCREEN -->
+    <section id="jamScreen" class="view active">
+      <div id="cueContainer">
+        <div id="currentCue" class="cue-current"></div>
+        <div id="partArrow" class="arrow-part">&#10132;</div>
+        <div id="nextCue" class="cue-next"></div>
+      </div>
+      <!-- BPM Widget -->
+      <div id="bpmWidget">
+        <span class="bpm-arrow" id="bpmDec">&#9664;</span>
+        <label>BPM</label>
+        <input id="bpmInput" type="number" min="60" max="140" value="100" />
+        <span class="bpm-arrow" id="bpmInc">&#9654;</span>
+        <button id="bpmToggle">Enable</button>
+      </div>
+    </section>
+
+    <!-- SONG EDITOR SCREEN (placeholder) -->
+    <section id="editScreen" class="view">
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          font-size: 6vw;
+        "
+      >
+        Song Editor (WIP)
+      </div>
+    </section>
 
     <script>
-      /* === CONFIG === */
+      /* ===== CONFIG / DATA ===== */
       const songs = {
         "Song A": [
           "Intro",
@@ -156,22 +294,53 @@
         ],
       };
 
-      /* === STATE === */
+      /* ===== STATE ===== */
       const songNames = Object.keys(songs);
       let currentSongIdx = 0,
         currentPartIdx = 0;
+      let activeView = "jam";
 
-      /* === DOM === */
+      /* ===== DOM ===== */
+      const songNameEl = document.getElementById("songName");
       const prevSongArrowEl = document.getElementById("prevSongArrow");
       const nextSongArrowEl = document.getElementById("nextSongArrow");
-      const songNameEl = document.getElementById("songName");
       const currentCueEl = document.getElementById("currentCue");
       const nextCueEl = document.getElementById("nextCue");
-      const arrowEl = document.getElementById("arrow");
+      const partArrowEl = document.getElementById("partArrow");
       const PORTRAIT = window.matchMedia("(orientation: portrait)");
       const LANDSCAPE = window.matchMedia("(orientation: landscape)");
 
-      /* === RENDER === */
+      /* ----- BPM elements ----- */
+      const bpmInput = document.getElementById("bpmInput");
+      const bpmDec = document.getElementById("bpmDec");
+      const bpmInc = document.getElementById("bpmInc");
+      const bpmToggle = document.getElementById("bpmToggle");
+      let bpm = 100,
+        bpmEnabled = false,
+        beatTimer = null;
+
+      /* ===== VIEW ROUTER ===== */
+      const views = {
+        jam: document.getElementById("jamScreen"),
+        edit: document.getElementById("editScreen"),
+      };
+      const sideMenu = document.getElementById("sideMenu");
+      document
+        .getElementById("hamburger")
+        .addEventListener("click", () => sideMenu.classList.toggle("hidden"));
+      sideMenu.addEventListener("click", (e) => {
+        const v = e.target.dataset.view;
+        if (!v) return;
+        showView(v);
+      });
+      function showView(view) {
+        activeView = view;
+        Object.values(views).forEach((v) => v.classList.remove("active"));
+        views[view].classList.add("active");
+        sideMenu.classList.add("hidden");
+      }
+
+      /* ===== SONG NAV HELPERS ===== */
       function updateSongArrows() {
         prevSongArrowEl.classList.toggle("disabled", currentSongIdx === 0);
         nextSongArrowEl.classList.toggle(
@@ -179,18 +348,51 @@
           currentSongIdx === songNames.length - 1
         );
       }
+      function nextSong() {
+        if (currentSongIdx < songNames.length - 1) {
+          currentSongIdx++;
+          currentPartIdx = 0;
+          updateDisplay();
+        }
+      }
+      function prevSong() {
+        if (currentSongIdx > 0) {
+          currentSongIdx--;
+          currentPartIdx = 0;
+          updateDisplay();
+        }
+      }
+      prevSongArrowEl.addEventListener("click", prevSong);
+      nextSongArrowEl.addEventListener("click", nextSong);
 
+      /* ===== PART NAV HELPERS ===== */
+      function nextPart() {
+        if (activeView !== "jam") return;
+        const parts = songs[songNames[currentSongIdx]];
+        if (currentPartIdx < parts.length - 1) {
+          currentPartIdx++;
+          updateDisplay();
+        }
+      }
+      function prevPart() {
+        if (activeView !== "jam") return;
+        if (currentPartIdx > 0) {
+          currentPartIdx--;
+          updateDisplay();
+        }
+      }
+
+      /* ===== DISPLAY UPDATE ===== */
       function updateDisplay() {
-        const songName = songNames[currentSongIdx],
-          parts = songs[songName];
+        const songName = songNames[currentSongIdx];
+        const parts = songs[songName];
         songNameEl.textContent = songName;
         updateSongArrows();
-
         currentCueEl.textContent = parts[currentPartIdx];
         if (currentPartIdx < parts.length - 1) {
           nextCueEl.textContent = parts[currentPartIdx + 1];
           nextCueEl.style.display = "";
-          arrowEl.style.display = LANDSCAPE.matches ? "" : "";
+          partArrowEl.style.display = LANDSCAPE.matches ? "" : "";
           currentCueEl.classList.add("has-next");
           if (LANDSCAPE.matches) {
             currentCueEl.style.textAlign = "right";
@@ -204,7 +406,7 @@
           }
         } else {
           nextCueEl.style.display = "none";
-          arrowEl.style.display = "none";
+          partArrowEl.style.display = "none";
           currentCueEl.classList.remove("has-next");
           if (LANDSCAPE.matches) {
             currentCueEl.style.textAlign = "center";
@@ -222,60 +424,80 @@
       PORTRAIT.addEventListener("change", updateDisplay);
       LANDSCAPE.addEventListener("change", updateDisplay);
 
-      /* === NAV HELPERS === */
-      function nextPart() {
-        const parts = songs[songNames[currentSongIdx]];
-        if (currentPartIdx < parts.length - 1) {
-          currentPartIdx++;
-          updateDisplay();
+      /* ===== BPM LOGIC ===== */
+      function clampBpm(val) {
+        return Math.min(140, Math.max(60, val));
+      }
+      function renderBpm() {
+        bpmInput.value = bpm;
+      }
+      function startBeat() {
+        clearInterval(beatTimer);
+        const period = 60000 / bpm;
+        if (bpmEnabled) {
+          beatTimer = setInterval(() => {
+            document.body.classList.add("flash");
+            setTimeout(() => document.body.classList.remove("flash"), 100);
+          }, period);
         }
       }
-      function prevPart() {
-        if (currentPartIdx > 0) {
-          currentPartIdx--;
-          updateDisplay();
-        }
+      function setBpm(val) {
+        bpm = clampBpm(val);
+        renderBpm();
+        startBeat();
       }
-      function nextSong() {
-        if (currentSongIdx < songNames.length - 1) {
-          currentSongIdx++;
-          currentPartIdx = 0;
-          updateDisplay();
-        }
-      }
-      function prevSong() {
-        if (currentSongIdx > 0) {
-          currentSongIdx--;
-          currentPartIdx = 0;
-          updateDisplay();
-        }
-      }
+      bpmDec.addEventListener("click", () => setBpm(bpm - 1));
+      bpmInc.addEventListener("click", () => setBpm(bpm + 1));
+      bpmInput.addEventListener("change", (e) =>
+        setBpm(parseInt(e.target.value) || bpm)
+      );
+      bpmToggle.addEventListener("click", () => {
+        bpmEnabled = !bpmEnabled;
+        bpmToggle.textContent = bpmEnabled ? "Disable" : "Enable";
+        startBeat();
+      });
+      renderBpm();
 
-      /* === ARROW CLICK LISTENERS === */
-      prevSongArrowEl.addEventListener("click", prevSong);
-      nextSongArrowEl.addEventListener("click", nextSong);
-
-      /* === TOUCH / CLICK (PART NAV) === */
-      document.addEventListener("click", nextPart);
+      /* ===== TOUCH / CLICK PART NAV ===== */
+      document.addEventListener("click", (e) => {
+        if (
+          e.target.closest("#songHeader") ||
+          e.target.closest("#bpmWidget") ||
+          e.target.closest("#sideMenu") ||
+          activeView !== "jam"
+        )
+          return;
+        nextPart();
+      });
       document.addEventListener("contextmenu", (e) => {
+        if (activeView !== "jam") return;
         e.preventDefault();
         prevPart();
       });
+
       let touchTimer,
         longFired = false;
-      document.addEventListener("touchstart", () => {
+      document.addEventListener("touchstart", (e) => {
+        if (activeView !== "jam") return;
+        if (
+          e.target.closest("#bpmWidget") ||
+          e.target.closest("#songHeader") ||
+          e.target.closest("#sideMenu")
+        )
+          return;
         longFired = false;
         touchTimer = setTimeout(() => {
           prevPart();
           longFired = true;
         }, 600);
       });
-      document.addEventListener("touchend", () => {
+      document.addEventListener("touchend", (e) => {
+        if (activeView !== "jam") return;
         clearTimeout(touchTimer);
         if (!longFired) nextPart();
       });
 
-      /* === SINGLE "P" KEY W/ DOUBLE TAP & HOLD === */
+      /* ===== SINGLE "P" KEY WITH GESTURES (Jam view only) ===== */
       let keyStart = null,
         holdTimeout = null,
         holdInterval = null;
@@ -287,32 +509,34 @@
         holdTimeout = holdInterval = null;
       }
       document.addEventListener("keydown", (e) => {
-        if (e.key.toLowerCase() !== "p" || keyStart !== null) return;
+        if (activeView !== "jam") return;
+        if (keyStart !== null) return;
         keyStart = Date.now();
-        const isSecondTap = tapCount === 1;
-        if (isSecondTap && doubleTapTimer) {
+        const isSecond = tapCount === 1;
+        if (isSecond && doubleTapTimer) {
           clearTimeout(doubleTapTimer);
           doubleTapTimer = null;
         }
-        const repeatFn = isSecondTap ? prevSong : prevPart;
+        const repeatFn = isSecond ? prevSong : prevPart;
         holdTimeout = setTimeout(() => {
           repeatFn();
           holdInterval = setInterval(repeatFn, 500);
         }, 500);
       });
       document.addEventListener("keyup", (e) => {
-        if (e.key.toLowerCase() !== "p" || keyStart === null) return;
-        const duration = Date.now() - keyStart;
+        if (activeView !== "jam") return;
+        if (keyStart === null) return;
+        const dur = Date.now() - keyStart;
         keyStart = null;
         clearHoldTimers();
         if (tapCount === 1) {
-          if (duration < 150) {
+          if (dur < 150) {
             nextSong();
           }
           tapCount = 0;
           return;
         }
-        if (duration < 500) {
+        if (dur < 500) {
           tapCount = 1;
           doubleTapTimer = setTimeout(() => {
             if (tapCount === 1) {
@@ -326,8 +550,7 @@
         }
       });
 
-      /* === EXPORT === */
-      Object.assign(window, { nextPart, prevPart, nextSong, prevSong });
+      /* ===== INIT ===== */
       updateDisplay();
     </script>
   </body>
