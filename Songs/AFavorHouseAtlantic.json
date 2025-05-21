@@ -1,0 +1,77 @@
+{
+  "songTitle": "A Favor House Atlantic",
+  "artist": "Coheed and Cambria",
+  "bpm": 83,
+  "parts": [
+    {
+      "name": "Intro",
+      "repeat": 3,
+      "description": "x3"
+    },
+    {
+      "name": "Verse 1",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Pre-Chorus",
+      "repeat": 1,
+      "description": "x1"
+    },
+    {
+      "name": "Chorus",
+      "repeat": 3,
+      "description": "x3"
+    },
+    {
+      "name": "Chorus-Out",
+      "repeat": 1,
+      "description": "x1"
+    },
+    {
+      "name": "Bridge",
+      "repeat": 3,
+      "description": "x3"
+    },
+    {
+      "name": "Verse 2",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Chorus",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Chorus-Out",
+      "repeat": 1,
+      "description": "x1"
+    },
+    {
+      "name": "Interlude",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Chorus",
+      "repeat": 4,
+      "description": "4"
+    },
+    {
+      "name": "Interlude",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Interlude",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Outro",
+      "repeat": 1,
+      "description": "x1"
+    }
+  ]
+}
