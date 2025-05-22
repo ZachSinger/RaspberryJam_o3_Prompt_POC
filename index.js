@@ -158,6 +158,10 @@ const getCurrentSongPartName = () => {
   return getCurrentSong().parts[songPartIndex].name;
 };
 
+const getCurrentSongPartDescription = () => {
+  return getCurrentSong().parts[songPartIndex].description;
+};
+
 function updateNextSongPartDisplay() {
   const el = document.getElementById("next-song-part");
   const currentSong = getCurrentSong();
@@ -182,6 +186,13 @@ function updateCurrentSongPartDisplay() {
   }
   updateNextSongPartDisplay();
 }
+
+//Update description display for current song part
+const updateCurrentDescriptionDisplay = () => {
+  const currentSong = getCurrentSong();
+  const descriptionDisplay = getDescriptionDisplayText();
+  descriptionDisplay.textContent = getCurrentSongPartDescription();
+};
 
 /**
  *  -----------Hamburger Menu Functions---------------
@@ -219,6 +230,7 @@ const initialize = async () => {
   bpmBtn.classList.toggle("bpm-disabled", !isBpmModeActive);
 
   updateCurrentSongPartDisplay();
+  updateCurrentDescriptionDisplay();
 };
 
 // Example usage:

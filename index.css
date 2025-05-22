@@ -86,7 +86,7 @@ body {
 
 #main-display-region {
   width: 100%;
-  flex: 0 0 80%;
+  flex: 0 0 70%;
   height: 70%;
   background: #000000;
   overflow: auto;
@@ -189,7 +189,9 @@ body {
   flex: 1 1 0%; /* Take up all remaining space */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
+  align-items: center;
+  font-size: 3em;
 }
 
 .current-song-part-row {
@@ -203,7 +205,7 @@ body {
 
 #current-song-part {
   color: #fff;
-  font-size: 8em; /* Slightly smaller to help fit all elements */
+  font-size: 16em; /* Twice as large as previous 8em */
   font-weight: bold;
   text-align: center;
   margin: 0;
@@ -236,11 +238,11 @@ body {
 }
 
 #next-song-part {
-  color: #bbbbbb; /* Slightly duller white */
-  font-size: 4em; /* Half the size of #current-song-part */
+  color: #bbbbbb;
+  font-size: 8em; /* Twice as large as previous 4em */
   text-align: left;
   margin: 0 0 0 0.2em;
-  display: none; /* Hidden by default, shown via JS */
+  display: none; /* Shown via JS when appropriate */
   align-items: center;
   justify-content: flex-start;
 }
