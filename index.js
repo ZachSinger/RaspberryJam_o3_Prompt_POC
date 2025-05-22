@@ -187,11 +187,43 @@ function updateCurrentSongPartDisplay() {
   updateNextSongPartDisplay();
 }
 
+const changeSongPartDisplay = (backward = false) => {
+  let currentSong = getCurrentSong();
+  let length = currentSong.parts.length;
+  let increment = backward ? -1 : 1;
+  let newIndex = songPartIndex + increment;
+
+  console.log(currentSong, songPartIndex, length, increment, newIndex);
+  if (newIndex < length && newIndex >= 0) {
+    songPartIndex += increment;
+    refreshDisplayRegions();
+  }
+
+  if (newIndex === length - 1) {
+    getNextSongPart().textContent = "";
+  }
+
+  // Always update next-song-part visibility after changing part
+  const nextSongPartEl = document.getElementById("next-song-part");
+  if (nextSongPartEl) {
+    if (songPartIndex < currentSong.parts.length - 1) {
+      nextSongPartEl.style.display = "flex";
+    } else {
+      nextSongPartEl.style.display = "none";
+    }
+  }
+};
+
 //Update description display for current song part
 const updateCurrentDescriptionDisplay = () => {
-  const currentSong = getCurrentSong();
   const descriptionDisplay = getDescriptionDisplayText();
+
   descriptionDisplay.textContent = getCurrentSongPartDescription();
+};
+
+const refreshDisplayRegions = () => {
+  updateCurrentSongPartDisplay();
+  updateCurrentDescriptionDisplay();
 };
 
 /**
@@ -237,3 +269,30 @@ const initialize = async () => {
 (async () => {
   await initialize();
 })();
+
+let keyDownTimestamp = null;
+let keyIsDown = false;
+let repeatInterval = null;
+
+document.addEventListener("keydown", (event) => {
+  if (keyIsDown) return; // Prevent repeat while holding
+  keyIsDown = true;
+  keyDownTimestamp = Date.now();
+
+  // Start repeat after 500ms if still held
+  repeatInterval = setTimeout(function repeat() {
+    changeSongPartDisplay(true);
+    repeatInterval = setTimeout(repeat, 500);
+  }, 500);
+});
+
+document.addEventListener("keyup", (event) => {
+  if (!keyIsDown) return;
+  keyIsDown = false;
+  const duration = Date.now() - keyDownTimestamp;
+  clearTimeout(repeatInterval);
+
+  if (duration <= 150) {
+    changeSongPartDisplay(false); // Quick tap
+  }
+});
