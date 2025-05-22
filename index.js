@@ -152,6 +152,38 @@ const updateSongInSetText = () => {
 };
 
 /**
+ *  -----------Current Song Functions---------------
+ */
+const getCurrentSongPartName = () => {
+  return getCurrentSong().parts[songPartIndex].name;
+};
+
+function updateNextSongPartDisplay() {
+  const el = document.getElementById("next-song-part");
+  const currentSong = getCurrentSong();
+  if (
+    el &&
+    currentSong &&
+    Array.isArray(currentSong.parts) &&
+    songPartIndex < currentSong.parts.length - 1
+  ) {
+    el.style.display = "block";
+    el.textContent = currentSong.parts[songPartIndex + 1].name;
+  } else if (el) {
+    el.style.display = "none";
+  }
+}
+
+// Update both displays when the song part changes
+function updateCurrentSongPartDisplay() {
+  const el = document.getElementById("current-song-part");
+  if (el) {
+    el.textContent = getCurrentSongPartName();
+  }
+  updateNextSongPartDisplay();
+}
+
+/**
  *  -----------Hamburger Menu Functions---------------
  */
 
@@ -185,6 +217,8 @@ const initialize = async () => {
   bpmBtn.innerText = isBpmModeActive ? "Disable" : "Enable";
   bpmBtn.classList.toggle("bpm-enabled", isBpmModeActive);
   bpmBtn.classList.toggle("bpm-disabled", !isBpmModeActive);
+
+  updateCurrentSongPartDisplay();
 };
 
 // Example usage:
