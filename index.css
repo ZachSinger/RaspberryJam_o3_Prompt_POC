@@ -203,7 +203,7 @@ body {
 
 #current-song-part {
   color: #fff;
-  font-size: 8em;      /* Slightly smaller to help fit all elements */
+  font-size: 8em; /* Slightly smaller to help fit all elements */
   font-weight: bold;
   text-align: center;
   margin: 0;
@@ -216,9 +216,9 @@ body {
 
 #song-part-arrow {
   color: #fff;
-  font-size: 4em;      /* Half the size of #current-song-part */
+  font-size: 4em; /* Half the size of #current-song-part */
   margin: 0 0.2em;
-  display: none;       /* Hidden by default, shown in landscape */
+  display: none; /* Hidden by default */
   align-items: center;
   justify-content: center;
 }
@@ -236,11 +236,11 @@ body {
 }
 
 #next-song-part {
-  color: #bbbbbb;      /* Slightly duller white */
-  font-size: 4em;      /* Half the size of #current-song-part */
+  color: #bbbbbb; /* Slightly duller white */
+  font-size: 4em; /* Half the size of #current-song-part */
   text-align: left;
   margin: 0 0 0 0.2em;
-  display: none;       /* Hidden by default, shown via JS */
+  display: none; /* Hidden by default, shown via JS */
   align-items: center;
   justify-content: flex-start;
 }
@@ -248,4 +248,24 @@ body {
 /* Optional: ensure next-song-part is always in the row */
 .current-song-part-row #next-song-part {
   display: flex;
+}
+
+/* Portrait: stack next-song-part below the row */
+@media (orientation: portrait) {
+  .current-song-part-row {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+  }
+  #next-song-part {
+    margin: 0.2em 0 0 0;
+    text-align: center;
+    width: 100%;
+    display: flex !important; /* Ensure it shows if JS wants it visible */
+    justify-content: center;
+    align-items: center;
+    position: static; /* Remove any absolute/fixed positioning */
+  }
 }
