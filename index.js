@@ -274,6 +274,7 @@ let keyDownTimestamp = null;
 let keyIsDown = false;
 let repeatInterval = null;
 
+// Keyboard handlers
 document.addEventListener("keydown", (event) => {
   if (keyIsDown) return; // Prevent repeat while holding
   keyIsDown = true;
@@ -291,6 +292,33 @@ document.addEventListener("keyup", (event) => {
   keyIsDown = false;
   const duration = Date.now() - keyDownTimestamp;
   clearTimeout(repeatInterval);
+
+  if (duration <= 150) {
+    changeSongPartDisplay(false); // Quick tap
+  }
+});
+
+// Touch handlers
+let touchDownTimestamp = null;
+let touchIsDown = false;
+let touchRepeatInterval = null;
+
+document.addEventListener("touchstart", (event) => {
+  if (touchIsDown) return;
+  touchIsDown = true;
+  touchDownTimestamp = Date.now();
+
+  touchRepeatInterval = setTimeout(function repeat() {
+    changeSongPartDisplay(true);
+    touchRepeatInterval = setTimeout(repeat, 500);
+  }, 500);
+});
+
+document.addEventListener("touchend", (event) => {
+  if (!touchIsDown) return;
+  touchIsDown = false;
+  const duration = Date.now() - touchDownTimestamp;
+  clearTimeout(touchRepeatInterval);
 
   if (duration <= 150) {
     changeSongPartDisplay(false); // Quick tap
