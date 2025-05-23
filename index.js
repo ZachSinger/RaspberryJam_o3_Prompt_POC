@@ -152,6 +152,81 @@ const updateSongInSetText = () => {
 };
 
 /**
+ *  -----------Current Song Functions---------------
+ */
+const getCurrentSongPartName = () => {
+  return getCurrentSong().parts[songPartIndex].name;
+};
+
+const getCurrentSongPartDescription = () => {
+  return getCurrentSong().parts[songPartIndex].description;
+};
+
+function updateNextSongPartDisplay() {
+  const el = document.getElementById("next-song-part");
+  const currentSong = getCurrentSong();
+  if (
+    el &&
+    currentSong &&
+    Array.isArray(currentSong.parts) &&
+    songPartIndex < currentSong.parts.length - 1
+  ) {
+    el.style.display = "block";
+    el.textContent = currentSong.parts[songPartIndex + 1].name;
+  } else if (el) {
+    el.style.display = "none";
+  }
+}
+
+// Update both displays when the song part changes
+function updateCurrentSongPartDisplay() {
+  const el = document.getElementById("current-song-part");
+  if (el) {
+    el.textContent = getCurrentSongPartName();
+  }
+  updateNextSongPartDisplay();
+}
+
+const changeSongPartDisplay = (backward = false) => {
+  let currentSong = getCurrentSong();
+  let length = currentSong.parts.length;
+  let increment = backward ? -1 : 1;
+  let newIndex = songPartIndex + increment;
+
+  console.log(currentSong, songPartIndex, length, increment, newIndex);
+  if (newIndex < length && newIndex >= 0) {
+    songPartIndex += increment;
+    refreshDisplayRegions();
+  }
+
+  if (newIndex === length - 1) {
+    getNextSongPart().textContent = "";
+  }
+
+  // Always update next-song-part visibility after changing part
+  const nextSongPartEl = document.getElementById("next-song-part");
+  if (nextSongPartEl) {
+    if (songPartIndex < currentSong.parts.length - 1) {
+      nextSongPartEl.style.display = "flex";
+    } else {
+      nextSongPartEl.style.display = "none";
+    }
+  }
+};
+
+//Update description display for current song part
+const updateCurrentDescriptionDisplay = () => {
+  const descriptionDisplay = getDescriptionDisplayText();
+
+  descriptionDisplay.textContent = getCurrentSongPartDescription();
+};
+
+const refreshDisplayRegions = () => {
+  updateCurrentSongPartDisplay();
+  updateCurrentDescriptionDisplay();
+};
+
+/**
  *  -----------Hamburger Menu Functions---------------
  */
 
@@ -185,9 +260,67 @@ const initialize = async () => {
   bpmBtn.innerText = isBpmModeActive ? "Disable" : "Enable";
   bpmBtn.classList.toggle("bpm-enabled", isBpmModeActive);
   bpmBtn.classList.toggle("bpm-disabled", !isBpmModeActive);
+
+  updateCurrentSongPartDisplay();
+  updateCurrentDescriptionDisplay();
 };
 
 // Example usage:
 (async () => {
   await initialize();
 })();
+
+let keyDownTimestamp = null;
+let keyIsDown = false;
+let repeatInterval = null;
+
+// Keyboard handlers
+document.addEventListener("keydown", (event) => {
+  if (keyIsDown) return; // Prevent repeat while holding
+  keyIsDown = true;
+  keyDownTimestamp = Date.now();
+
+  // Start repeat after 500ms if still held
+  repeatInterval = setTimeout(function repeat() {
+    changeSongPartDisplay(true);
+    repeatInterval = setTimeout(repeat, 500);
+  }, 500);
+});
+
+document.addEventListener("keyup", (event) => {
+  if (!keyIsDown) return;
+  keyIsDown = false;
+  const duration = Date.now() - keyDownTimestamp;
+  clearTimeout(repeatInterval);
+
+  if (duration <= 150) {
+    changeSongPartDisplay(false); // Quick tap
+  }
+});
+
+// Touch handlers
+let touchDownTimestamp = null;
+let touchIsDown = false;
+let touchRepeatInterval = null;
+
+document.addEventListener("touchstart", (event) => {
+  if (touchIsDown) return;
+  touchIsDown = true;
+  touchDownTimestamp = Date.now();
+
+  touchRepeatInterval = setTimeout(function repeat() {
+    changeSongPartDisplay(true);
+    touchRepeatInterval = setTimeout(repeat, 500);
+  }, 500);
+});
+
+document.addEventListener("touchend", (event) => {
+  if (!touchIsDown) return;
+  touchIsDown = false;
+  const duration = Date.now() - touchDownTimestamp;
+  clearTimeout(touchRepeatInterval);
+
+  if (duration <= 150) {
+    changeSongPartDisplay(false); // Quick tap
+  }
+});

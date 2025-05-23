@@ -1,0 +1,47 @@
+{
+  "songTitle": "Someday",
+  "artist": "The Strokes",
+  "bpm": 83,
+  "parts": [
+    {
+      "name": "Intro",
+      "repeat": 2,
+      "description": "x2"
+    },
+    {
+      "name": "Verse 1",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Chorus",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Bridge",
+      "repeat": 1,
+      "description": "x1"
+    },
+    {
+      "name": "Verse Lead In",
+      "repeat": 2,
+      "description": "x2"
+    },
+    {
+      "name": "Verse 2",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Chorus",
+      "repeat": 4,
+      "description": "x4"
+    },
+    {
+      "name": "Outro",
+      "repeat": 1,
+      "description": "x1"
+    }
+  ]
+}
