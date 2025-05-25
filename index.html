@@ -444,7 +444,7 @@
         const duration = Date.now() - keyDownTimestamp;
         clearTimeout(repeatInterval);
 
-        if (duration <= 150) {
+        if (duration <= 500) {
           changeSongPartDisplay(false); // Quick tap
         }
       });
