@@ -1,14 +1,36 @@
 html,
 body {
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden; /* Prevent scrolling */
 }
 
 body {
+  min-height: 100vh;
+  min-width: 100vw;
+  height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent scrolling */
+}
+
+#app-toolbar-container,
+#main-display-region,
+#description-display-region,
+#bpm-display-region {
+  box-sizing: border-box;
+}
+
+#main-display-region,
+#description-display-region,
+#bpm-display-region {
+  flex-shrink: 0;
+  flex-grow: 0;
+  overflow: hidden;
 }
 
 #app-toolbar-container {
@@ -97,10 +119,7 @@ body {
 }
 
 .separator {
-  width: 90%;
-  flex: 0, 0, 5px;
-  height: 5px;
-  background-color: #ffffff;
+  display: none; /* Hide separators if they cause extra space */
 }
 
 #mobile-menu {

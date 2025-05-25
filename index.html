@@ -58,6 +58,134 @@
       <p id="bpm-display-shape"></p>
     </div>
     <script>
+      const AFavorHouseAtlantic = {
+        songTitle: "A Favor House Atlantic",
+        artist: "Coheed and Cambria",
+        bpm: 83,
+        parts: [
+          {
+            name: "Intro",
+            repeat: 3,
+            description: "x3",
+          },
+          {
+            name: "Verse 1",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Pre-Chorus",
+            repeat: 1,
+            description: "x1",
+          },
+          {
+            name: "Chorus",
+            repeat: 3,
+            description: "x3",
+          },
+          {
+            name: "Chorus-Out",
+            repeat: 1,
+            description: "x1",
+          },
+          {
+            name: "Bridge",
+            repeat: 3,
+            description: "x3",
+          },
+          {
+            name: "Verse 2",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Chorus",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Chorus-Out",
+            repeat: 1,
+            description: "x1",
+          },
+          {
+            name: "Interlude",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Chorus",
+            repeat: 4,
+            description: "4",
+          },
+          {
+            name: "Interlude",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Interlude",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Outro",
+            repeat: 1,
+            description: "x1",
+          },
+        ],
+      };
+
+      const Someday = {
+        songTitle: "Someday",
+        artist: "The Strokes",
+        bpm: 83,
+        parts: [
+          {
+            name: "Intro",
+            repeat: 2,
+            description: "x2",
+          },
+          {
+            name: "Verse 1",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Chorus",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Bridge",
+            repeat: 1,
+            description: "x1",
+          },
+          {
+            name: "Verse Lead In",
+            repeat: 2,
+            description: "x2",
+          },
+          {
+            name: "Verse 2",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Chorus",
+            repeat: 4,
+            description: "x4",
+          },
+          {
+            name: "Outro",
+            repeat: 1,
+            description: "x1",
+          },
+        ],
+      };
+
+      const setA = [AFavorHouseAtlantic, Someday];
+
       const getAppToolbar = () => {
         return document.getElementById("app-toolbar-container");
       };
@@ -142,42 +270,6 @@
       const renderMainDisplayRegion = () => {};
 
       renderMainDisplayRegion();
-
-      const loadCurrentSet = async () => {
-        try {
-          const response = await fetch(`sets/${currentSetName}.json`);
-          if (!response.ok) {
-            throw new Error("Unable to fetch json");
-          }
-          const data = await response.json();
-          return data;
-        } catch (error) {
-          console.error(`Error loading ${currentSetName}.json:`, error);
-          return [];
-        }
-      };
-
-      const loadSongsInSet = async () => {
-        if (!currentSetData || currentSetData.length === 0) {
-          currentSetData = await loadCurrentSet();
-        }
-        if (!currentSetData) currentSetData = [];
-        const songJsons = await Promise.all(
-          currentSetData.map(async (songName) => {
-            try {
-              const response = await fetch(`songs/${songName}.json`);
-              if (!response.ok) {
-                throw new Error(`Unable to fetch ${songName}.json`);
-              }
-              return await response.json();
-            } catch (error) {
-              console.error(`Error loading ${songName}.json:`, error);
-              return null;
-            }
-          })
-        );
-        return songJsons;
-      };
 
       /**
        *  -----------Song In Set Functions---------------
@@ -307,8 +399,7 @@
       };
 
       const initialize = async () => {
-        currentSetData = await loadCurrentSet();
-        songsInSetData = await loadSongsInSet();
+        songsInSetData = setA;
 
         getSongNameText().innerText = songsInSetData[songInSetIndex].songTitle;
         getHamburgerWidget().addEventListener("click", toggleHamburgerMenu);
